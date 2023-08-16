@@ -1,0 +1,210 @@
+ggi<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nabin</title>
+    <!-- css link -->
+    <link rel="stylesheet" href="./style.css">
+
+    <!-- axios cdn link -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background: rgb(230, 41, 41);
+            background: -moz-linear-gradient(90deg, rgba(230, 41, 41, 1) 10%, rgba(255, 174, 41, 1) 100%);
+            background: -webkit-linear-gradient(90deg, rgba(230, 41, 41, 1) 10%, rgba(255, 174, 41, 1) 100%);
+            background: linear-gradient(90deg, rgba(230, 41, 41, 1) 10%, rgba(255, 174, 41, 1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e62929", endColorstr="#ffae29", GradientType=1);
+        }
+
+        .center {
+            color: white;
+        }
+
+        .section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .user-details {
+            background-color: azure;
+            width: fit-content;
+            margin: 2rem auto;
+        }
+
+        .avatar {
+            width: 150px;
+            aspect-ratio: 1/1;
+            display: flex;
+            border-radius: 50%;
+        }
+
+        .error-message {
+            background-color: black;
+            color: white;
+            width: fit-content;
+            padding: 10px 20px;
+            position: fixed;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            border-radius: 50px;
+            font-size: 24px;
+        }
+
+        .scale-up-left {
+            -webkit-animation: scale-up-left 0.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+            animation: scale-up-left 0.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+        }
+
+        @-webkit-keyframes scale-up-left {
+            0% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                -webkit-transform-origin: 0% 50%;
+                transform-origin: 0% 50%;
+            }
+
+            100% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+                -webkit-transform-origin: 0% 50%;
+                transform-origin: 0% 50%;
+            }
+        }
+
+        @keyframes scale-up-left {
+            0% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                -webkit-transform-origin: 0% 50%;
+                transform-origin: 0% 50%;
+            }
+
+            100% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+                -webkit-transform-origin: 0% 50%;
+                transform-origin: 0% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="section">
+        <div class="search-form">
+            <h2 class="center">Search For User</h2>
+            <form onsubmit="searchUser(); return false">
+                <input type="text" class="" id="search_bar">
+                <input type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="section scale-up-left center" id="user_detail">
+        <h2 class="center">User Details</h2>
+        <div class="user-avatar">
+            <img id="user_avatar_url"></img>
+        </div>
+        <div class="user-login">
+            User ID:
+            <span id="user_login"></span>
+        </div>
+        <div class="user-name">
+            User Name:
+            <span id="user_name"></span>
+        </div>
+        <div class="user-github-profile">
+            Github URL:
+            <a id="user_github_html_url" target="_blank" class="center"></a>
+        </div>
+        <div class="user-public-repos">
+            Public Repos:
+            <span id="user_public_repos"></span>
+        </div>
+    </div>
+
+
+
+    <div id="error_message" class="error-message">
+    </div>
+
+    <!-- js link -->
+    <script src="./app.js"></script>
+    <script>
+        const users_list = document.getElementById('users_list'); // linking user_list from the html file to js file 
+        const user_detail = document.getElementById('user_detail'); // linking user_detail from the html file to js file
+        const user_login = document.getElementById('user_login');
+        const user_name = document.getElementById('user_name');
+        const user_avatar = document.getElementById('user_avatar_url');
+        const user_github = document.getElementById('user_github_html_url');
+        const search_bar = document.getElementById('search_bar');
+        const search_button = document.getElementById('search_button');
+        const error_message = document.getElementById('error_message');
+        const user_public_repos = document.getElementById('user_public_repos');
+
+        window.addEventListener('load', () => {
+            search_bar.value = '';
+        });
+
+        user_detail.style.display = 'none';
+        error_message.style.display = 'none';
+
+
+        // base url for github api
+        const base_url = 'https://api.github.com/users';
+
+        // search the user based in the input in search bar
+        function searchUser() {
+            const search_value = search_bar.value;
+            if (search_value.trim() !== '') {
+                fetch(`${base_url}/${search_value}`)
+                    .then(response => response.json())
+                    .then(user => {
+                        user_detail.style.display = 'block';
+                        user_login.textContent = user.login;
+                        user_name.textContent = user.name === null ? "User name not set." : user.name;
+                        user_avatar.src = user.avatar_url;
+                        user_avatar.alt = user.name;
+                        user_github.href = user.html_url;
+                        user_github.textContent = user.html_url;
+                        user_public_repos.textContent = user.public_repos;
+                    })
+                    .catch(function (error) {
+                        user_detail.style.display = 'none';
+                        console.log("Error while fetching.\n", error);
+                        pop_error()
+                        error_message.innerHTML = "Please enter a valid username or user does not exist. " + error;
+                    })
+            }
+            else {
+                pop_error()
+                user_detail.style.display = 'none';
+                error_message.innerHTML = "Please enter username";
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
